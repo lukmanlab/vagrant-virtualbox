@@ -1,0 +1,28 @@
+---
+  - hosts: all
+    become: yes
+  
+    tasks:
+    - name: update and install python minimal
+      raw: sudo apt-get update && sudo apt-get install python-minimal -y
+  
+    - name: add public key host
+      authorized_key:
+        user: vagrant
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      
+    - name: enable ipv4 forwarding
+      lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^net.ipv4.ip_forward'
+        insertafter: '^#net.ipv4.ip_forward'
+        line: net.ipv4.ip_forward=1
+  
+    - name: add nameserver for resolving
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver'
+        insertafter: '^nameserver'
+        line: nameserver 8.8.8.8
+    
